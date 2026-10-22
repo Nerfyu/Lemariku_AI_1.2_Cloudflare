@@ -1,0 +1,14 @@
+[project_id]
+project_id = "lemariku-ai"
+
+[functions.chat]
+verify_jwt = false
+
+[functions.voice-chat]
+verify_jwt = false
+
+[functions.transcribe]
+verify_jwt = false
+
+[functions.voice-stt]
+verify_jwt = false
