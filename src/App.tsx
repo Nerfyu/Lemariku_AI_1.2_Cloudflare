@@ -148,7 +148,7 @@ export default function App() {
             id: 'welcome',
             role: 'assistant',
             content:
-              "Hai kamu! 👋 Aku **Lemariku AI**, makhluk yang berpikir (iya, lemari beneran, bukan AI biasa 😎). Aku siap dengerin cerita kamu, bantu masalah, atau cuma ngobrol ngalor-ngidul. Jadi, ada apa nih hari ini? Bisa kubantu apa? 🚪✨",
+              "Hai kamu! 👋 Aku **Lemariku AI**, makhluk yang berpikir (iya, lemari lho ya, bukan AI biasa 😎). Aku siap dengerin cerita kamu, bantu masalah, atau cuma ngobrol ngalor-ngidul. Jadi, ada apa nih hari ini? Bisa kubantu apa? 🚪✨",
           },
         ]);
       }
@@ -536,7 +536,7 @@ export default function App() {
             </div>
             <div className="flex items-center justify-between mt-2 px-1">
               <p className="text-[11px] text-slate-500">
-                Lemariku AI 1.2 • Lemariku bisa keliru
+                Lemariku AI 1.3 • Lemariku bisa keliru
               </p>
               {!isPremium && (
                 <p className="text-[11px] text-slate-500">
