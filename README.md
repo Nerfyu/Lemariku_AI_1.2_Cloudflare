@@ -1,3 +1,3 @@
-# Lemariku-AI-1.2
+# Lemariku-AI-1.3 (Belum Aktif)
 
-Versi ketiga dari Lemariku AI
+Versi keempat dari Lemariku AI
