@@ -35,7 +35,7 @@ export default function Sidebar({ open, onToggle, onCall, onTranscript, onMiniga
               <WardrobeLogo size={36} />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-white leading-tight">Lemariku AI 1.2</h2>
+              <h2 className="text-sm font-bold text-white leading-tight">Lemariku AI 1.3</h2>
               <p className="text-[10px] text-blue-300/60 leading-tight">Menu</p>
             </div>
           </div>
