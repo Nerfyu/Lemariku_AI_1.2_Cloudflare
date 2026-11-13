@@ -11,7 +11,7 @@ interface Variant {
 const VARIANTS: Variant[] = [
   {
     title: 'Lemariku AI 1.3',
-    description: 'Konon katanya lemari adalah makhluk yang berpikir',
+    description: 'Konon katanya Lemari adalah makhluk yang berpikir',
     image: '/og/og-1.jpg',
   },
   {
