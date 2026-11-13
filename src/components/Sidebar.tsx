@@ -123,7 +123,7 @@ export default function Sidebar({ open, onToggle, onCall, onTranscript, onMiniga
         {/* Footer */}
         <div className="px-4 py-4 border-t border-blue-900/40">
           <p className="text-[10px] text-slate-500 text-center">
-            Lemariku AI 1.2 oleh Nerfyu
+            Lemariku AI 1.3 oleh Nerfyu
           </p>
           {isPremium && (
             <p className="text-[10px] text-yellow-500/70 text-center mt-1">
