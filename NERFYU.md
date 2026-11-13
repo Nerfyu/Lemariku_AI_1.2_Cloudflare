@@ -6,3 +6,5 @@ Setiap perubahan versi Lemari, saya sebagai Nerfyu harus memerhatikan secara khu
 - Lemariku/src/components/sidebar.tsx -- Ubah pada versinya Lemariku AI X.X terdapat 2 yang perlu diubah
 - Lemariku/src/lib/App.tsx -- Ubah pada versinya Lemariku AI X.X terdapat pada baris ke-539 mungkin bisa berubah
 - Periksa aset kembali
+
+# Nerfyu
