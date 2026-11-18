@@ -9,6 +9,7 @@ import VoiceCall from './components/VoiceCall';
 import Transcript from './components/Transcript';
 import Thesis from './components/Thesis';
 import AccessCodeModal from './components/AccessCodeModal';
+import ShopCard from './components/ShopCard';
 import { supabase } from '@/lib/supabase';
 import { prepareImage } from '@/lib/image';
 import {useBacksound} from '@/lib/useBacksound';
@@ -28,8 +29,13 @@ const WELLBEING_CHECK_THRESHOLD = 15;
 
 function parseFeatures(content: string) {
   const hasTranscript = /\[FITUR:transkrip\]/i.test(content);
-  const text = content.replace(/\[FITUR:transkrip\]/gi, '').trim();
-  return { text, hasTranscript };
+  const buyMatch = content.match(/\[BELI:([a-z0-9-]+)\]/i);
+  const buySlug = buyMatch ? buyMatch[1].toLowerCase() : null;
+  const text = content
+    .replace(/\[FITUR:transkrip\]/gi, '')
+    .replace(/\[BELI:[a-z0-9-]+\]/gi, '')
+    .trim();
+  return { text, hasTranscript, buySlug };
 }
 
 function renderContent(text: string) {
@@ -250,6 +256,7 @@ export default function App() {
       setMessages((prev) => [...prev, aiMsg]);
 
       await supabase.from('chat_messages').insert({
+        id: aiMsg.id,
         session_id: sessionId,
         role: 'assistant',
         content: reply,
@@ -258,7 +265,7 @@ export default function App() {
       if (nextCount >= WELLBEING_CHECK_THRESHOLD && !wellbeingDismissed) {
         setShowWellbeingModal(true);
       }
-    } catch {
+    } catch (err) {
       const errMsg: DisplayMessage = {
         id: crypto.randomUUID(),
         role: 'assistant',
@@ -395,10 +402,10 @@ export default function App() {
         <main className="relative z-10 flex-1 overflow-y-auto min-h-0 overscroll-contain" ref={scrollRef}>
           <div className="max-w-3xl mx-auto px-4 py-6 space-y-5">
             {messages.map((msg) => {
-              const { text, hasTranscript } =
+              const { text, hasTranscript, buySlug } =
                 msg.role === 'assistant'
                   ? parseFeatures(msg.content)
-                  : { text: msg.content, hasTranscript: false };
+                  : { text: msg.content, hasTranscript: false, buySlug: null };
               return (
                 <div
                   key={msg.id}
@@ -431,10 +438,11 @@ export default function App() {
                           className="mb-2 max-h-64 w-full rounded-xl object-cover"
                         />
                       )}
-                      {msg.content && (
-                        <p className="whitespace-pre-wrap break-words">{renderContent(msg.content)}</p>
+                      {text && (
+                        <p className="whitespace-pre-wrap break-words">{renderContent(text)}</p>
                       )}
                     </div>
+                    {buySlug && <ShopCard messageId={msg.id} slug={buySlug} sessionId={sessionId} />}
                     {hasTranscript && (
                       <button
                         type="button"
