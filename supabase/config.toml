@@ -12,3 +12,6 @@ verify_jwt = false
 
 [functions.voice-stt]
 verify_jwt = false
+
+[functions.shop]
+verify_jwt = false
