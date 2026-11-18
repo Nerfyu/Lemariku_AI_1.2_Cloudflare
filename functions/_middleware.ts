@@ -31,42 +31,82 @@ const VARIANTS: Variant[] = [
   },
 ];
 
+// Path khusus: /promosi1, /promosi2, ... -> varian ke-1, ke-2, ...
+// Masing-masing punya URL sendiri, jadi WhatsApp menyimpan cache-nya terpisah.
+const PROMO_PATH = /^\/promosi(\d+)\/?$/i;
+
 export const onRequest: PagesFunction = async (context) => {
-  const response = await context.next();
+  const url = new URL(context.request.url);
+  const promo = url.pathname.match(PROMO_PATH);
+  const promoIdx = promo ? Number(promo[1]) : 0;
+  const isPromo = promoIdx >= 1 && promoIdx <= VARIANTS.length;
+
+  // Untuk /promosiN, ambil halaman utama (index.html) sebagai isinya.
+  let response: Response;
+  if (isPromo) {
+    response = await context.env.ASSETS.fetch(new Request(`${url.origin}/`, context.request));
+  } else {
+    response = await context.next();
+  }
 
   // Hanya olah HTML, biarkan JS/CSS/gambar/audio lewat apa adanya.
   const type = response.headers.get('content-type') ?? '';
   if (!type.includes('text/html')) return response;
 
-  const url = new URL(context.request.url);
-
-  // ?v=2 untuk memaksa varian tertentu (berguna saat testing).
+  // Pilih varian: /promosiN > ?v=N > acak.
   const forced = Number(url.searchParams.get('v'));
-  const idx =
-    Number.isInteger(forced) && forced >= 1 && forced <= VARIANTS.length
+  const idx = isPromo
+    ? promoIdx - 1
+    : Number.isInteger(forced) && forced >= 1 && forced <= VARIANTS.length
       ? forced - 1
       : Math.floor(Math.random() * VARIANTS.length);
   const v = VARIANTS[idx];
 
   const image = v.image.startsWith('http') ? v.image : `${url.origin}${v.image}`;
+
+  // PENTING: og:url harus sama dengan URL yang diminta untuk /promosiN.
+  // Kalau semuanya menunjuk ke "/", WhatsApp menganggap semua link itu satu halaman
+  // dan memakai cache thumbnail yang sama.
+  const pageUrl = isPromo ? `${url.origin}${url.pathname}` : `${url.origin}/`;
+
   const set = (content: string) => ({
     element(el: Element) {
       el.setAttribute('content', content);
     },
   });
 
-  const rewritten = new HTMLRewriter()
+  let rewriter = new HTMLRewriter()
     .on('meta[property="og:title"]', set(v.title))
     .on('meta[name="twitter:title"]', set(v.title))
     .on('meta[property="og:description"]', set(v.description))
     .on('meta[name="twitter:description"]', set(v.description))
     .on('meta[property="og:image"]', set(image))
     .on('meta[name="twitter:image"]', set(image))
-    .on('meta[property="og:url"]', set(`${url.origin}/`))
-    .transform(response);
+    .on('meta[property="og:url"]', set(pageUrl))
+    .on('link[rel="canonical"]', {
+      element(el: Element) {
+        el.setAttribute('href', pageUrl);
+      },
+    });
+
+  if (isPromo) {
+    // Untuk pengunjung asli: ubah alamat di browser menjadi "/" (tanpa reload).
+    // Crawler tidak menjalankan JS, jadi mereka tetap membaca meta di atas.
+    rewriter = rewriter.on('head', {
+      element(el: Element) {
+        el.append(
+          `<script>try{history.replaceState(null,'','/'+location.search+location.hash)}catch(e){}</script>`,
+          { html: true },
+        );
+      },
+    });
+  }
+
+  const rewritten = rewriter.transform(response);
 
   // Jangan di-cache agar tiap permintaan bisa dapat varian berbeda.
   const headers = new Headers(rewritten.headers);
   headers.set('Cache-Control', 'no-cache');
-  return new Response(rewritten.body, { status: rewritten.status, headers });
+  headers.delete('Location');
+  return new Response(rewritten.body, { status: 200, headers });
 };
