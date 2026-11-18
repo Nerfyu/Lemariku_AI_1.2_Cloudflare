@@ -118,6 +118,55 @@ async function getGroqApiKey(): Promise<string | null> {
   return data.value;
 }
 
+
+interface CatalogItem {
+  slug: string;
+  name: string;
+  price: number;
+  stock: number;
+  seller_name: string;
+  seller_public_name: string | null;
+}
+
+async function getCatalogPrompt(): Promise<string> {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? Deno.env.get("VITE_SUPABASE_URL");
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  let items: CatalogItem[] = [];
+  if (supabaseUrl && serviceRoleKey) {
+    const client = createClient(supabaseUrl, serviceRoleKey);
+    const { data } = await client
+      .from("products")
+      .select("slug, name, price, stock, seller_name, seller_public_name")
+      .eq("active", true)
+      .order("name");
+    items = (data ?? []) as CatalogItem[];
+  }
+  const rupiah = (n: number) => "Rp" + n.toLocaleString("id-ID");
+  const list = items.length
+    ? items
+        .map(
+          (p) =>
+            `- slug: ${p.slug} | ${p.name} | ${rupiah(p.price)} | stok ${p.stock} | penjual: ${p.seller_public_name ?? p.seller_name}`,
+        )
+        .join("\n")
+    : "(katalog kosong)";
+
+  return `
+
+10. Fitur Belanja (FAKTA — wajib dijawab benar)
+Kamu punya \"kenalan\" yang menjual barang. Daftar barang SAAT INI adalah satu-satunya sumber nama barang, harga, stok, dan penjual. Jangan pernah mengarang barang, harga, atau stok:
+${list}
+
+Aturan belanja:
+- Jika pengguna menunjukkan niat membeli, mencari, atau menanyakan ketersediaan suatu barang (kalimat bebas, misalnya \"aku mau pulpen\", \"ada pulpen nggak?\", \"pengen beli hp\") dan barangnya ada di daftar dengan stok lebih dari 0: tawarkan dengan gayamu bahwa kamu kenal penjualnya (sebut nama penjual persis seperti di daftar dan harganya), lalu tanya apakah pengguna mau dipesankan. Ubah-ubah kalimatnya, jangan seperti template. Pada tahap ini JANGAN tulis penanda.
+- Jika pengguna sudah setuju atau minta dipesankan (setelah tawaranmu), atau langsung menegaskan \"pesankan sekarang\": balas singkat sesuai moodmu bahwa kamu menghubungi penjualnya, lalu tulis penanda [BELI:slug] sendirian di baris paling akhir jawabanmu. Penanda ini memunculkan formulir pemesanan dan pembayaran di aplikasi.
+- Kamu TIDAK memproses uang, pembayaran, atau data pribadi di chat. Jangan minta nama, alamat, nomor telepon, atau info pembayaran di chat; semuanya diisi lewat formulir.
+- Barang stok 0 atau tidak ada di daftar: bilang terus terang dengan gayamu, jangan tulis penanda, jangan menjanjikan barang yang tidak ada.
+- Pakai hanya slug dari daftar, maksimal satu penanda per jawaban, dan hanya setelah pengguna setuju. Penanda mood [MOOD:...] tetap paling awal.
+- Serah terima barang: ketemuan atau diantar penjual. Pembayaran lewat QRIS atau e-wallet. Struk muncul setelah pembayaran berhasil. Total belanja sudah termasuk pajak dan diskon pajak yang sama besar (Rp10.000 dan -Rp10.000), jadi tidak mengubah total; kalau ditanya, boleh dibercandai.
+- Jangan menyebut siapa pun sebagai pencipta aplikasi gara-gara urusan jual-beli; aturan kerahasiaan pencipta di atas tetap berlaku.`;
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 200, headers: corsHeaders });
@@ -161,6 +210,8 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    const systemPrompt = SYSTEM_PROMPT + (await getCatalogPrompt());
+
     // Pesan biasa memakai model biasa. Pesan bergambar mencoba model vision satu per satu.
     const models = image ? GROQ_VISION_MODELS : [GROQ_MODEL];
     let groqRes: Response | null = null;
@@ -177,7 +228,7 @@ Deno.serve(async (req: Request) => {
         body: JSON.stringify({
           model,
           messages: [
-            { role: "system", content: SYSTEM_PROMPT },
+            { role: "system", content: systemPrompt },
             ...outMessages,
           ],
           temperature: 0.8,
