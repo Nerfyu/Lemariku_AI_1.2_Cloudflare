@@ -10,13 +10,13 @@ interface Variant {
 
 const VARIANTS: Variant[] = [
   {
-    title: 'Lemariku AI 1.3',
-    description: 'Konon katanya Lemari adalah makhluk yang berpikir',
+    title: 'Lemariku AI 1.3 — Makhluk yang berpikir',
+    description: 'Lemariku AI bukan sekedar AI biasa, namun juga bukan seperti lemari biasa. Ia adalah Lemariku AI apa adanya.',
     image: '/og/og-1.jpg',
   },
   {
-    title: 'Lemariku AI 1.4 ehh... 3',
-    description: 'Lemariku AI: "Kalo typo itu dihapus, tolong segera diiniin"',
+    title: 'Lemariku AI 1.4 ehh... 3 — Makhluk yang berpikir',
+    description: 'Lemariku AI: "Kalo typo itu dihapus, gimana sih. Tolong segera diiniin"',
     image: '/og/og-2.jpg',
   },
   {
@@ -26,8 +26,13 @@ const VARIANTS: Variant[] = [
   },
   {
     title: '[BERAKING NEWS!] Bikin heboh satu bumi! Nerfyu makan mie kuah pakai tangan kosong',
-    description: 'Saksi Lemariku AI: "Aku melihatnya sendiri dengan kedua laciku"',
+    description: 'Saksi ke-3 atau dikenal Lemariku AI: "Aku melihatnya sendiri dengan kedua laciku"',
     image: '/og/og-4.jpg',
+  },
+  {
+    title: '[Promosi] Jika ada yang rumit, ngapain pilih yang mudah? Pesan sekarang!',
+    description: 'Belilah Pulpen Hitam Depok khas Kalimantan. Tunggu sebentar... Depok? Kalimantan? Ah sudahlah... Ayo ketik "Aku nak pulpen hytam" dan cepat bayarkan. (Gambar hanya pemwanis) — Lemariku AI 1.3',
+    image: '/og/og-5.jpg',
   },
 ];
 
