@@ -1,4 +1,4 @@
-// Nerfyu
+// Nerfyu openai/gpt-oss-120b
 import { createClient } from "npm:@supabase/supabase-js@2.57.4";
 
 const corsHeaders = {
@@ -8,7 +8,7 @@ const corsHeaders = {
 };
 
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
-const GROQ_MODEL = "openai/gpt-oss-120b";
+const GROQ_MODEL = "qwen/qwen3.8-27b";
 const GROQ_VISION_MODELS = [
   "qwen/qwen3.8-27b",
   "meta-llama/llama-4-scout-17b-16e-instruct",
