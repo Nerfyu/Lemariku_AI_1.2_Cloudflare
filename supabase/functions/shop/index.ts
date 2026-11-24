@@ -238,7 +238,7 @@ async function orderStatus(db: SupabaseClient, req: Record<string, unknown>) {
 
 async function webhook(db: SupabaseClient, body: Record<string, string>) {
   const cfg = await getConfig(db);
-  if (!cfg) return json({ error: "Midtrans belum dikonfigurasi." }, 500);
+  if (!cfg) return json({ error: "Mesin pembayaran belum diatur." }, 500);
 
   const { order_id, status_code, gross_amount, signature_key } = body;
   if (!order_id || !status_code || !gross_amount || !signature_key) return json({ error: "Payload tidak sah." }, 400);
@@ -263,7 +263,7 @@ async function webhook(db: SupabaseClient, body: Record<string, string>) {
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 200, headers: corsHeaders });
-  if (req.method !== "POST") return json({ error: "Method tidak didukung." }, 405);
+  if (req.method !== "POST") return json({ error: "Metode tidak didukung." }, 405);
 
   try {
     const db = admin();
