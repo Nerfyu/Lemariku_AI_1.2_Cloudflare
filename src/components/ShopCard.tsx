@@ -79,7 +79,7 @@ function loadSnap(isProduction: boolean, clientKey: string): Promise<void> {
     s.onload = () => resolve();
     s.onerror = () => {
       snapLoading = null;
-      reject(new Error('Gagal memuat jendela pembayaran Midtrans.'));
+      reject(new Error('Gagal memuat jendela mesin pembayaran.'));
     };
     document.body.appendChild(s);
   });
@@ -94,7 +94,7 @@ const PAYMENT_LABEL: Record<string, string> = {
 
 const RECEIPT_JOKES = [
   'Dicap oleh laci nomor 3 yang paling jujur.',
-  'Struk ini sah menurut hukum rak dan gantungan.',
+  'Struk ini sah menurut hukum laci pasal 2.',
   'Barang sudah dilap pakai kain flanel. Mungkin.',
   'Simpan struk ini di laci. Atau di dompet. Atau di lemari lain.',
 ];
@@ -223,7 +223,7 @@ export default function ShopCard({ messageId, slug, sessionId }: Props) {
   const shell = 'w-full max-w-sm rounded-2xl bg-[#0F2145] ring-1 ring-blue-500/30 p-4 text-sm text-slate-100';
 
   if (productMissing) {
-    return <div className={shell}>Barangnya nggak ketemu di laciku 😵 Coba tanya lagi ya.</div>;
+    return <div className={shell}>Barangnya nggak ketemu di laciku 😵 Coba lagi ya.</div>;
   }
   if (!product) {
     return (
@@ -264,7 +264,7 @@ export default function ShopCard({ messageId, slug, sessionId }: Props) {
         </div>
         <div className="border-t border-dashed border-slate-400 my-3" />
         <p className="text-center text-[11px] text-slate-600">
-          Penjual akan menghubungimu untuk ketemuan/pengantaran.
+          Penjual akan menghampiri/menghubungimu untuk pengantaran.
           <br />
           {joke}
         </p>
