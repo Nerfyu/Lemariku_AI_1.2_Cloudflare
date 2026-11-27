@@ -24,6 +24,52 @@ interface DisplayMessage {
 
 type LemarikuMood = 'ramah' | 'cuek' | 'marah';
 
+// Warna bubble Lemari menurut mood.
+const BUBBLE_STYLE: Record<LemarikuMood, string> = {
+  ramah: 'bg-[#13284F] text-slate-100 ring-1 ring-sky-400/40 shadow-[0_0_14px_rgba(56,189,248,0.12)]',
+  cuek: 'bg-slate-700/50 text-slate-300 ring-1 ring-slate-500/30',
+  marah: 'bg-[#3A1418] text-red-50 ring-1 ring-red-500/50',
+};
+
+// Warna ikon + teks pada indikator loading.
+const LOADING_ACCENT: Record<LemarikuMood, { icon: string; text: string }> = {
+  ramah: { icon: 'text-blue-300', text: 'text-blue-300/80' },
+  cuek: { icon: 'text-slate-400', text: 'text-slate-400' },
+  marah: { icon: 'text-red-400', text: 'text-red-300' },
+};
+
+// Teks loading: sebagian besar sesuai mood terakhir, kadang diacak dari mood lain.
+const LOADING_TEXTS: Record<LemarikuMood, string[]> = {
+  ramah: [
+    'Lemari lagi mikir nih...',
+    'Bentar ya, lagi ngintip isi laci...',
+    'Lagi lipat jawaban biar rapi...',
+    'Lemari lagi nyari kata-kata yang pas...',
+    'Sebentar, lagi ngelap kata-katanya...',
+  ],
+  cuek: [
+    'Hmm... bentar...',
+    'Iya iya, bentar...',
+    'Lagi males sih, tapi dijawab kok...',
+    'Nanti ya, lagi rebahan di rak...',
+    'Lemari lagi ngelamun...',
+  ],
+  marah: [
+    'SABAR DONG, lagi dipikirin!',
+    'Jangan buru-buru, pintu lemari bisa nyangkut!',
+    'Lagi kesel, tapi tetap mikir nih...',
+    'Awas ya, jangan ngetuk-ngetuk layar!',
+    'Bentar! Lagi nyari kata yang paling tajam...',
+  ],
+};
+
+function pickLoadingText(mood: LemarikuMood): string {
+  const moods = Object.keys(LOADING_TEXTS) as LemarikuMood[];
+  const useOtherMood = Math.random() < 0.25;
+  const pool = LOADING_TEXTS[useOtherMood ? moods[Math.floor(Math.random() * moods.length)] : mood];
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
 const FREE_MESSAGE_LIMIT = 5;
 const WELLBEING_CHECK_THRESHOLD = 15;
 
@@ -117,6 +163,7 @@ export default function App() {
   const [messages, setMessages] = useState<DisplayMessage[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingText, setLoadingText] = useState('Lemari lagi mikir nih...');
   const [sessionId] = useState(getSessionId);
   const [userMessageCount, setUserMessageCount] = useState(0);
   const [isPremium, setIsPremium] = useState(false);
@@ -140,7 +187,7 @@ export default function App() {
     async function loadHistory() {
       const { data } = await supabase
         .from('chat_messages')
-        .select('id, role, content, created_at')
+        .select('id, role, content, mood, created_at')
         .eq('session_id', sessionId)
         .order('created_at', { ascending: true });
 
@@ -203,6 +250,7 @@ export default function App() {
     setInput('');
     setPendingImage(null);
     setImageError(null);
+    setLoadingText(pickLoadingText(lemarikuMood));
     setLoading(true);
     setUserMessageCount(nextCount);
 
@@ -260,6 +308,7 @@ export default function App() {
         session_id: sessionId,
         role: 'assistant',
         content: reply,
+        mood,
       });
 
       if (nextCount >= WELLBEING_CHECK_THRESHOLD && !wellbeingDismissed) {
@@ -281,7 +330,7 @@ export default function App() {
       setLoading(false);
       inputRef.current?.focus();
     }
-  }, [input, pendingImage, loading, messages, sessionId, userMessageCount, isPremium, wellbeingDismissed]);
+  }, [input, pendingImage, loading, messages, sessionId, userMessageCount, isPremium, wellbeingDismissed, lemarikuMood]);
 
   const handleSubscribeClose = useCallback(() => {
     setShowSubscribeModal(false);
@@ -428,7 +477,7 @@ export default function App() {
                       className={`rounded-2xl px-4 py-3 text-sm leading-relaxed transition-all duration-300 ${
                         msg.role === 'user'
                           ? 'bg-blue-600 text-white rounded-tr-sm'
-                          : 'bg-[#13284F] text-slate-100 rounded-tl-sm ring-1 ring-blue-800/30'
+                          : `rounded-tl-sm ${BUBBLE_STYLE[msg.mood ?? 'ramah']}`
                       }`}
                     >
                       {msg.image && (
@@ -466,11 +515,11 @@ export default function App() {
                     <WardrobeLogo size={36} />
                   </div>
                 </div>
-                <div className="bg-[#13284F] ring-1 ring-blue-800/30 rounded-2xl rounded-tl-sm px-4 py-3.5">
+                <div className={`rounded-2xl rounded-tl-sm px-4 py-3.5 transition-colors duration-300 ${BUBBLE_STYLE[lemarikuMood]}`}>
                   <div className="flex items-center gap-2">
-                    <Loader2 size={16} className="animate-spin text-blue-300" />
-                    <span className="text-sm text-blue-300/80">Lemari lagi mikir nih...</span>
-                    <Sparkles size={14} className="text-blue-400/50 animate-pulse" />
+                    <Loader2 size={16} className={`animate-spin ${LOADING_ACCENT[lemarikuMood].icon}`} />
+                    <span className={`text-sm ${LOADING_ACCENT[lemarikuMood].text}`}>{loadingText}</span>
+                    <Sparkles size={14} className={`animate-pulse opacity-50 ${LOADING_ACCENT[lemarikuMood].icon}`} />
                   </div>
                 </div>
               </div>
