@@ -48,8 +48,8 @@ const LOADING_TEXTS: Record<LemarikuMood, string[]> = {
     'Sebentar, lagi ngelap kata-katanya...',
   ],
   cuek: [
-    'Hmm... bentar...',
-    'Iya iya, bentar...',
+    'Hmm... bentar lho ya...',
+    'Iya iya, tunggu bentar...',
     'Lagi males sih, tapi dijawab kok...',
     'Nanti ya, lagi rebahan di rak...',
     'Lemari lagi ngelamun...',
